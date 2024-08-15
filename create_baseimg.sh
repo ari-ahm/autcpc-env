@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Settings
-ISO64="ubuntu-22.04.3-live-server-amd64.iso"
+ISO64="ubuntu-22.04.4-live-server-amd64.iso"
 OUT64="unattended-${ISO64}"
 IMG64="base-amd64.img"
 
@@ -127,7 +127,7 @@ rm -f "output/$IMG"
 set -x
 qemu-img create -f qcow2 -o size="$IMGSIZE" "output/$IMG"
 qemu-system-x86_64 \
-  --enable-kvm -m 4096 -global isa-fdc.driveA= \
+  --enable-kvm -m 4096 \
   -drive file="output/$IMG",index=0,media=disk,format=qcow2 \
   -cdrom $OUTISO -boot order=d \
   -net nic -net user,hostfwd=tcp::5222-:22,hostfwd=tcp::5280-:80 \

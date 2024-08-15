@@ -21,7 +21,7 @@ BASEIMG="base-amd64.img"
 qemu-img convert -O raw output/$BASEIMG $IMGFILE
 
 function runssh() {
-  ssh -i $SSH_BUILD_KEY -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes  imageadmin@localhost -p$SSHPORT $@ 2>/dev/null
+  sudo ssh -i $SSH_BUILD_KEY -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes  imageadmin@localhost -p$SSHPORT $@ 2>/dev/null
 }
 
 function cleanup() {
@@ -44,7 +44,7 @@ function waitforssh() {
   while [[ $X -lt $TIMEOUT ]]; do
     let X+=1
     set +e
-    OUT=$(ssh -i $SSH_BUILD_KEY -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes  imageadmin@localhost -p$SSHPORT echo "ok" 2>/dev/null)
+    OUT=$(sudo ssh -i $SSH_BUILD_KEY -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes  imageadmin@localhost -p$SSHPORT echo "ok" 2>/dev/null)
     set -e
     if [[ "$OUT" == "ok" ]]; then
       ALIVE=1
@@ -64,7 +64,7 @@ function waitforssh() {
   fi
 }
 
-qemu-system-x86_64 -smp 1 -m 1024 -drive file="$IMGFILE",index=0,media=disk,format=raw -global isa-fdc.driveA= --enable-kvm -net user,hostfwd=tcp::$SSHPORT-:22 -net nic --daemonize --pidfile $PIDFILE -vnc :0 -vga qxl -spice port=5901,disable-ticketing -usbdevice tablet
+qemu-system-x86_64 -smp 1 -m 1024 -drive file="$IMGFILE",index=0,media=disk,format=raw --enable-kvm -net user,hostfwd=tcp::$SSHPORT-:22 -net nic --daemonize --pidfile $PIDFILE -vnc :0 -vga qxl -spice port=5901,disable-ticketing -usbdevice tablet
 
 ALIVE=0
 waitforssh
@@ -80,7 +80,7 @@ EOF
 ANSIBLE_HOST_KEY_CHECKING=False time ansible-playbook -i $INVENTORY_FILE  --ssh-extra-args="-o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --diff --become -u imageadmin --private-key $SSH_BUILD_KEY main.yml
 rm -f $INVENTORY_FILE
 
-ssh -i $SSH_ICPCADMIN_KEY -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes  icpcadmin@localhost -p$SSHPORT sudo reboot
+sudo ssh -i $SSH_ICPCADMIN_KEY -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes  icpcadmin@localhost -p$SSHPORT sudo reboot
 # Wait 5 seconds for reboot to happen so we don't ssh back in before it actually reboots
 sleep 5
 ALIVE=0
@@ -88,8 +88,8 @@ waitforssh
 
 echo "Preparing image for distribution"
 set -x
-ssh -i $SSH_ICPCADMIN_KEY -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes  icpcadmin@localhost -p$SSHPORT sudo bash -c "/icpc/scripts/makeDist.sh"
-ssh -i $SSH_ICPCADMIN_KEY -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes  icpcadmin@localhost -p$SSHPORT sudo shutdown --poweroff --no-wall +1
+sudo ssh -i $SSH_ICPCADMIN_KEY -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes  icpcadmin@localhost -p$SSHPORT sudo bash -c "/icpc/scripts/makeDist.sh"
+sudo ssh -i $SSH_ICPCADMIN_KEY -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes  icpcadmin@localhost -p$SSHPORT sudo shutdown --poweroff --no-wall +1
 
 # Dig holes in the file to make it sparse (i.e. smaller!)
 fallocate -d $IMGFILE

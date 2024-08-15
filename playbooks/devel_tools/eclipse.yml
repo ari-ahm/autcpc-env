@@ -1,6 +1,6 @@
 ---
   - name: install eclipse(64bit)
-    unarchive: src=files/eclipse-java-2023-12-R-linux-gtk-x86_64.tar.gz dest=/opt creates=/opt/eclipse
+    unarchive: src=files/eclipse-java-2022-09-R-linux-gtk-x86_64.tar.gz dest=/opt creates=/opt/eclipse
 
   - name: eclipse shortcut
     copy:

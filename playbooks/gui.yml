@@ -13,25 +13,6 @@
 # firmware-misc-nonfree
 
 
-- name: install xfce and friends(without their recommended packages)
-  apt:
-    state: present
-    install_recommends: false
-    pkg:
-      # Turns it into something resembling xubuntu(themes/etc)
-      - xubuntu-default-settings
-      - xfce4
-      # recommends for xfce4
-      - desktop-base
-      - tango-icon-theme
-      - thunar-volman
-      # power management/terminal
-      - xfce4-power-manager
-      - xfce4-terminal
-      # So we can show the output of commands in the panel (used for showing team name/info)
-      - xfce4-genmon-plugin
-
-
 - name: add mozilla firefox ppa (because snaps are dumb)
   ansible.builtin.apt_repository:
     repo: ppa:mozillateam/ppa
